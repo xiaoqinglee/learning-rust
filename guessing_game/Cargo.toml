@@ -1,0 +1,11 @@
+[package]
+name = "guessing_game"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# 0.8.3 实际上是 ^0.8.3 的简写，它表示任何至少包含 0.8.3 但低于 0.9.0 的版本。
+# Cargo 认为这些版本具有与 0.8.3 版本兼容的公有 API， 并且此规范可确保你将获得最新的补丁版本，它仍然可以与本章中的代码正常编译。
+rand = "0.8.3"
