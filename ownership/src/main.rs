@@ -79,6 +79,75 @@ fn no_dangle() -> String {
     s
 }
 
+//另一个没有所有权的数据类型是 slice.
+//ref 是 ordinary pointer;
+//slice 是 two-word pointer.
+
+fn use_shared_slice() {
+    let mut a = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let b = &a[5..]; //b is &[i32]
+
+    //以下两行保持此顺序可以编译
+    println!("b: {:?}", b);
+    a[3] = 100;
+
+    // //以下两行保持此顺序无法编译
+    // //cannot borrow `a` as mutable because it is also borrowed as immutable
+    // a[3] = 100;
+    // println!("b: {:?}", b);
+}
+
+fn use_mutable_slice() {
+    let mut a = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let b = &mut a[5..]; //b is &mut [i32]
+
+    // //以下两行保持此顺序无法编译
+    // //cannot borrow `a` as immutable because it is also borrowed as mutable [E0502]
+    // println!("a: {:?}", a);
+    // b[3] = 100;
+
+    //以下两行保持此顺序可以编译
+    b[3] = 100;
+    println!("a: {:?}", a);
+}
+
+fn str_() {
+    //&str 底层是 &[u8].
+    // 但是字符串 slice range 的索引必须位于有效的 UTF-8 字符边界内，
+    // 如果尝试从一个多字节字符的中间位置创建字符串 slice，
+    // 则程序将会panic。
+
+    let s = String::from("中国");
+    //Returns the length of this String, in bytes,
+    let len_ = s.len();
+    println!("len_ {}", len_); //6
+    println!("&s[..] {}", &s[..]);
+    // //thread 'main' panicked at 'byte index 1 is not a char boundary; it is inside '中' (bytes 0..3) of `中国`'
+    // println!("&s[..1]{}", &s[..1]);
+}
+
+fn bad_signature(s: &String) {
+    println!("s: {}", s);
+}
+
+fn good_signature(s: &str) {
+    println!("s: {}", s);
+}
+
+fn str_vs_String() {
+    //如果有一个字符串 slice，可以直接传递它。
+    // 如果有一个 String，则可以传递整个 String 的 slice 或对 String 的引用。
+    // 这种灵活性利用了 deref coercions 的优势。
+    // 定义一个获取字符串 slice 而不是 String 引用的函数使得我们的 API 更加通用并且不会丢失任何功能。
+
+    let s = String::from("hello");
+    bad_signature(&s);
+    good_signature(&s);
+
+    let slice: &str = &s;
+}
+
+//shared or mutable 都是编译期要处理的逻辑, 被编译好的二进制可执行文件中是不包含shared or mutable的信息的
 fn main() {
-    no_dangle();
+    str_vs_String();
 }
