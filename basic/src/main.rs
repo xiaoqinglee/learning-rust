@@ -1,7 +1,3 @@
-fn main() {
-    test_fun()
-}
-
 //https://stackoverflow.com/questions/21747136/how-do-i-print-in-rust-the-type-of-a-variable
 fn get_type<T>(_: &T) -> &'static str {
     std::any::type_name::<T>()
@@ -143,4 +139,100 @@ fn fun6(var1: i32, var2: f64) {
     {
         ()
     }
+}
+
+fn if_() {
+    // rust 不会把非bool值隐式转换成bool值
+    let number = 3;
+    // //mismatched types [E0308]
+    // if number {
+    //     println!("number was three");
+    // }
+    if number != 0 {
+        println!("number was something other than zero");
+    }
+
+    let number = 6;
+    if number % 4 == 0 {
+        println!("number is divisible by 4");
+    } else if number % 3 == 0 {
+        println!("number is divisible by 3");
+    } else if number % 2 == 0 {
+        println!("number is divisible by 2");
+    } else {
+        println!("number is not divisible by 4, 3, or 2");
+    }
+
+    //if是一个表达式, 它有值
+    //Because if is an expression,
+    // we can use it on the right side of a let statement to assign the outcome to a variable
+    let condition = true;
+    let number = if condition { 5 } else { 6 };
+    println!("The value of number is: {}", number);
+}
+
+fn for_loop() {
+    //dead loop
+    // loop{
+    //     println!("again!")
+    // }
+
+    //for loop 也是表达式, 如果想得到它的值, 把值放到 break 后面
+    let mut var = 0;
+    //value is &str
+    let value = loop {
+        var += 1;
+        if var == 100 {
+            break "done";
+        }
+    };
+    println!("value: {:?}", value);
+
+    let mut var = 0;
+    // value is ()
+    let value = while var != 100 {
+        var += 1;
+    };
+    println!("value: {:?}", value);
+
+    // //while 循环内不能使用break
+    // // can only break with a value inside `loop` or breakable block
+    // let mut var = 0;
+    // let value = while true{
+    //     var += 1;
+    //     if var == 100{
+    //         break "break while";
+    //     }
+    // };
+    // println!("value: {:?}", value);
+}
+
+fn iterate_collection() {
+    let a = [11, 22, 33, 44, 55];
+    let mut index = 0;
+    while index < a.len() {
+        println!("a[{}]: {}", index, a[index]);
+        index += 1;
+    }
+
+    let a = [11, 22, 33, 44, 55];
+    for elem in a {
+        println!("elem: {}", elem);
+    }
+
+    for num in 1..=5 {
+        println!("1..=5 num: {}", num);
+    }
+
+    for num in 1..6 {
+        println!("1..6 num: {}", num);
+    }
+
+    for num in (1..6).rev() {
+        println!("(1..6).rev() num: {}", num);
+    }
+}
+
+fn main() {
+    iterate_collection()
 }
