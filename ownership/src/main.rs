@@ -147,7 +147,54 @@ fn str_vs_String() {
     let slice: &str = &s;
 }
 
-//shared or mutable 都是编译期要处理的逻辑, 被编译好的二进制可执行文件中是不包含shared or mutable的信息的
+fn what_mutable_mean() {
+    //shared or mutable 都是编译期要处理的逻辑, 被编译好的二进制可执行文件中是不包含shared or mutable的信息的
+
+    //1. let 与变量名之间的 mut 标识:
+    // 1.1如果变量类型是非ref非slice, 那么mut的有无代表该变量own的数据是否可以被更改.
+    //    (有两个方面: 1.1.1: 被own的数据发生in-place更改. 1.1.2 放弃原数据, 改own其他数据.)
+    // 1.2如果变量类型是ref或slice, 那么mut的有无代表该ref或slice是否可以指向其他的数据.
+
+    //2. 创建 mut ref 和 mut slice 实例时的 mut 标识:
+    // mut的有无代表是否允许通过该实例修改被指向的数据.
+
+    let mut a = vec![11, 22, 33, 44, 55];
+    //1.1.1
+    a.clear();
+    //1.1.2
+    a = vec![111, 222, 333, 444, 555];
+
+    let a = vec![11, 22, 33, 44, 55];
+    // //1.1.1
+    // //Cannot borrow immutable local variable `a` as mutable
+    // a.clear();
+    // //1.1.2
+    // //Cannot assign twice to immutable variable [E0384]
+    // a = vec![111,222,333,444,555];
+
+    let vec_1 = vec![11, 22, 33, 44, 55];
+    let vec_2 = vec![111, 222, 333, 444, 555];
+    //1.2
+    let mut a = &vec_1;
+    a = &vec_2;
+    let mut a = &vec_1[..2];
+    a = &vec_2[..2];
+    //1.2
+    let a = &vec_1;
+    // //Cannot assign twice to immutable variable [E0384]
+    // a = &vec_2;
+    let a = &vec_1[..2];
+    // //Cannot assign twice to immutable variable [E0384]
+    // a = &vec_2[..2];
+
+    //2
+    let mut vec_1 = vec![11, 22, 33, 44, 55];
+    //a 是 immutable 的, 代表它不能再指向别的数据. 它的类型是&mut[i32], 我们可以经由它改变它所指向的数据.
+    let a = &mut vec_1[..2];
+    a[0] = 42;
+    println!("a: {:?}", a); //[42, 22].
+}
+
 fn main() {
-    str_vs_String();
+    what_mutable_mean();
 }
