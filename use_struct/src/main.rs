@@ -73,6 +73,37 @@ fn use_tuple_struct() {
     println!("z: {}", z);
 }
 
+#[derive(Debug)]
+struct AlwaysEqual;
+
+fn use_unit_like_struct() {
+    //类单元结构体常常在你想要在某个类型上实现 trait 但不需要在类型中存储数据的时候发挥作用。
+    let a = AlwaysEqual;
+    println!("a: {:?}", a);
+}
+
+fn factorial(n: u32) -> u32 {
+    if dbg!(n <= 1) {
+        dbg!(1)
+    } else {
+        dbg!(n * factorial(n - 1))
+    }
+}
+
+fn use_debug_macro() {
+    //println! 获得参数的 shared ref, 返回 ()
+    assert_eq!(println!(), ());
+
+    //dbg! 获得参数的 ownership, 并返回该 ownership
+    dbg!(factorial(4));
+
+    let a = AlwaysEqual;
+    dbg!(a);
+
+    let a = AlwaysEqual;
+    dbg!(&a);
+}
+
 fn main() {
-    use_tuple_struct()
+    use_debug_macro();
 }
