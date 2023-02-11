@@ -6,7 +6,7 @@ struct User {
     sign_in_count: u64,
 }
 
-fn use_user() {
+fn use_struct() {
     let u1 = User {
         username: String::from("u1"),
         email: String::from("u1@example.com"),
@@ -53,6 +53,26 @@ fn use_user() {
     u5.username = String::from("u5");
     println!("u5: {:?}", u5);
 }
+
+struct Color(f64, u32, u32);
+struct Point(f64, u32, u32);
+
+fn use_tuple_struct() {
+    let black = Color(3.33, 10, 5);
+    let origin = Point(0.00, 0, 0);
+
+    // //mismatched types [E0308] expected struct `Color`, found struct `Point`
+    // let white: Color = origin;
+
+    // //mismatched types [E0308] expected struct `Point`, found tuple
+    // let (x, y, z) = origin;
+
+    let Color(x, y, z) = black;
+    println!("x: {}", x);
+    println!("y: {}", y);
+    println!("z: {}", z);
+}
+
 fn main() {
-    use_user()
+    use_tuple_struct()
 }
