@@ -1,3 +1,5 @@
+use std::fmt::{Debug, Display, Formatter};
+
 #[derive(Debug)]
 struct Point<T, U> {
     x: T,
@@ -148,7 +150,119 @@ fn use_trait_bound() {
     print_summary_v2(a);
 }
 
+// //通过 + 指定多个 trait bound
+// //item 需要同时实现两个不同的 trait：Display 和 Summary
+// fn notify(item: impl Summary_V1 + Display) {}
+
+// //通过 where 简化 trait bound
+//
+// fn some_function_v1<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32 {
+//     42
+// }
+//
+// fn some_function_v2<T, U>(t: T, u: U) -> i32
+// where
+//     T: Display + Clone,
+//     U: Clone + Debug,
+// {
+//     42
+// }
+
+fn returns_summarizable() -> impl Summary_V1 {
+    Novel {
+        author: String::from("欧亨利"),
+        content: String::from("麦琪的礼物"),
+    }
+}
+
+fn use_impl_trait_as_return() {
+    dbg!(returns_summarizable().summarize());
+}
+
+//使用 trait bound 有条件地实现方法
+//所有的Pair<T>都实现了new(), 只有<T: Display + PartialOrd>这个子集里的Pair<T>实现了cmp_display()
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+impl<T: Display + PartialOrd> Pair<T> {
+    fn cmp_display(&self) {
+        if self.x >= self.y {
+            println!("The largest member is x = {}", self.x);
+        } else {
+            println!("The largest member is y = {}", self.y);
+        }
+    }
+}
+
+fn conditionally_impl_methods() {
+    let pair1 = Pair::new(1, 2);
+    pair1.cmp_display();
+    let a = Novel {
+        author: String::from("欧亨利"),
+        content: String::from("麦琪的礼物"),
+    };
+    let b = Novel {
+        author: String::from("欧亨利"),
+        content: String::from("警察与赞美诗"),
+    };
+    let pair2 = Pair::new(a, b);
+    // //the method `cmp_display` exists for struct `Pair<Novel>`,
+    // // but its trait bounds were not satisfied [E0599]
+    // pair2.cmp_display();
+}
+
+//使用 trait bound 有条件地实现trait
+// We can also conditionally implement a trait for any type that implements another trait.
+// Implementations of a trait on any type that satisfies the trait bounds
+// are called blanket implementations and are extensively used in the Rust standard library.
+// For example, the standard library implements the ToString trait on any type
+// that implements the Display trait.
+//
+// impl<T: Display> ToString for T {
+//     // --snip--
+// }
+
+trait PrintV1 {
+    fn print_v1(&self) -> String;
+}
+
+trait PrintV2 {
+    fn print_v2(&self) -> String;
+}
+
+// //尝试为所有实现了 PrintV1 trait 的类型实现 Debug trait, 结果 Debug 处报错
+// //Only traits defined in the current crate can be implemented for arbitrary types [E0117]
+// impl<T: PrintV1> Debug for T {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+//         f.write_str(&self.print_v1())
+//     }
+// }
+
+// //尝试为所有实现了 Debug trait 的类型实现 PrintV2 trait //没有问题
+// impl<T: Debug> PrintV2 for T {
+//     fn print_v2(&self) -> String {
+//         String::from(format!("{:?}", *self))
+//     }
+// }
+
+// //尝试为所有实现了 PrintV1 trait 的类型实现 PrintV2 trait //没有问题
+// impl<T: PrintV1> PrintV2 for T {
+//     fn print_v2(&self) -> String {
+//         String::from(self.print_v1())
+//     }
+// }
+
 fn main() {
     use_impl_trait();
     use_trait_bound();
+    use_impl_trait_as_return();
+    conditionally_impl_methods();
 }
