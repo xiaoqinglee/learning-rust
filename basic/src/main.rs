@@ -186,25 +186,26 @@ fn for_loop() {
             break "done";
         }
     };
-    println!("value: {:?}", value);
+    println!("value: {:?}", value); //"done"
 
     let mut var = 0;
     // value is ()
     let value = while var != 100 {
         var += 1;
     };
-    println!("value: {:?}", value);
+    println!("value: {:?}", value); //()
 
-    // //while 循环内不能使用break
-    // // can only break with a value inside `loop` or breakable block
-    // let mut var = 0;
-    // let value = while true{
-    //     var += 1;
-    //     if var == 100{
-    //         break "break while";
-    //     }
-    // };
-    // println!("value: {:?}", value);
+    let mut var = 0;
+    let value = while true {
+        var += 1;
+        if var == 100 {
+            // //while 循环内使用 break 的时候只能使用空 break, 不可以在 break 后携带值
+            // // can only break with a value inside `loop` or breakable block
+            // break "break while";
+            break;
+        }
+    };
+    println!("value: {:?}", value); //()
 }
 
 fn iterate_collection() {
@@ -234,5 +235,5 @@ fn iterate_collection() {
 }
 
 fn main() {
-    iterate_collection()
+    for_loop()
 }
