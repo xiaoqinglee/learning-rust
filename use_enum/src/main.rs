@@ -83,6 +83,7 @@ fn plus_one_or_do_nothing(optional: Option<i32>) -> Option<i32> {
     }
 }
 
+#[derive(Debug)]
 enum Language {
     Lisp,
     C,
@@ -93,7 +94,15 @@ enum Language {
     Rust,
 }
 
-fn match_language(lang: Language) -> &'static str {
+fn match_language_v1(lang: Language) -> String {
+    match lang {
+        Language::C => String::from("c"),
+        Language::Rust => String::from("rust"),
+        other => format!("other: {:?}", other),
+    }
+}
+
+fn match_language_v2(lang: Language) -> &'static str {
     match lang {
         Language::C => "c",
         Language::Rust => "rust",
@@ -149,11 +158,15 @@ fn use_pattern_matching() {
     // println!("a == b: {}", a == b)
     println!("a == b: {}", a == c); //a == b: true
 
-    dbg!(match_language(Language::C));
-    dbg!(match_language(Language::Rust));
-    dbg!(match_language(Language::Go));
+    dbg!(match_language_v1(Language::C));
+    dbg!(match_language_v1(Language::Rust));
+    dbg!(match_language_v1(Language::Go));
+
+    dbg!(match_language_v2(Language::C));
+    dbg!(match_language_v2(Language::Rust));
+    dbg!(match_language_v2(Language::Go));
 }
 
 fn main() {
-    irrefutable_or_refutable();
+    use_pattern_matching();
 }
