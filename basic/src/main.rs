@@ -232,8 +232,44 @@ fn iterate_collection() {
     for num in (1..6).rev() {
         println!("(1..6).rev() num: {}", num);
     }
+
+    //为了保持 Rust 中的移动语义，for 循环会消耗掉值：
+    let strings: Vec<String> = vec![
+        String::from("hello"),
+        String::from("hi"),
+        String::from("halo"),
+    ];
+    for s in strings {
+        //每一个 String被移动进 s
+        println!("{}", s);
+    } //并在这里 drop
+      // //error: borrow of moved value: `strings` [E0382]
+      // println!("{} error(s)", strings.len());
+
+    //这样可能会很不方便，一个简单的方法是让循环获取集合的引用。然后循环变量将会变成集合中每一个元素的引用：
+    let strings: Vec<String> = vec![
+        String::from("hello"),
+        String::from("hi"),
+        String::from("halo"),
+    ];
+    for rs in &strings {
+        //这里 &strings 的类型是 &Vec<String>，rs 的类型是 &String。
+        println!("String {:?} is at address {:p}.", *rs, rs);
+    }
+
+    //迭代一个 mut 引用会产生每个元素的 mut 引用：
+    let mut strings: Vec<String> = vec![
+        String::from("hello"),
+        String::from("hi"),
+        String::from("halo"),
+    ];
+    for rs in &mut strings {
+        // rs 的类型是 &mut String
+        rs.push('\n'); //每个字符串添加一个换行符
+        println!("{}", rs);
+    }
 }
 
 fn main() {
-    for_loop()
+    iterate_collection()
 }
