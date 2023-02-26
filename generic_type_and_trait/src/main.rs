@@ -376,9 +376,61 @@ where
     }
 }
 
+//In general, fully qualified syntax is defined as follows:
+//
+// <Type as Trait>::function(receiver_if_method, next_arg, ...);
+
+trait Flyable {
+    fn live(&self) {
+        println!("我会飞");
+    }
+}
+trait Mammal {
+    fn live(&self) {
+        println!("我哺乳");
+    }
+}
+
+struct Bat;
+impl Bat {
+    fn live(&self) {
+        println!("我喜欢黑夜");
+    }
+}
+impl Flyable for Bat {}
+impl Mammal for Bat {}
+
+trait Animal {
+    fn name();
+}
+impl Animal for Bat {
+    fn name() {
+        println!("动物之蝙蝠");
+    }
+}
+impl Bat {
+    fn name() {
+        println!("蝙蝠");
+    }
+}
+
+fn test_call_trait_method() {
+    let a = Bat;
+
+    a.live();
+    Flyable::live(&a);
+    Mammal::live(&a);
+    <Bat as Flyable>::live(&a);
+    <Bat as Mammal>::live(&a);
+
+    Bat::name();
+    <Bat as Animal>::name();
+}
+
 fn main() {
-    use_impl_trait();
-    use_trait_bound();
-    use_impl_trait_as_return();
-    conditionally_impl_methods();
+    // use_impl_trait();
+    // use_trait_bound();
+    // use_impl_trait_as_return();
+    // conditionally_impl_methods();
+    test_call_trait_method()
 }
