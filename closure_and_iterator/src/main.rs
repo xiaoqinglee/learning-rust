@@ -275,10 +275,114 @@ fn three_iters() {
     assert_eq!(v1_into_iter.next(), Some(3));
     assert_eq!(v1_into_iter.next(), None);
 }
+
+fn test_trait_object() {
+    //https://doc.rust-lang.org/reference/types/closure.html
+    //https://users.rust-lang.org/t/cannot-move-a-value-of-type-dyn-for-r-fnonce-r-mut-u8-the-size-of-dyn-for-r-fnonce-r-mut-u8-cannot-be-statically-determined/57364/2
+    //https://stackoverflow.com/questions/30411594/cannot-move-a-value-of-type-fnonce-when-moving-a-boxed-function
+
+    //A closure type is approximately equivalent to a struct which contains the captured variables.
+    // For instance, the following closure:
+    //
+    // fn f<F : FnOnce() -> String> (g: F) {
+    //     println!("{}", g());
+    // }
+    //
+    // let mut s = String::from("foo");
+    // let t = String::from("bar");
+    //
+    // f(|| {
+    //     s += &t;
+    //     s
+    // });
+    // // Prints "foobar".
+    //
+    // generates a closure type roughly like the following:
+    //
+    // struct Closure<'a> {
+    //     s : String,
+    //     t : &'a String,
+    // }
+    //
+    // impl<'a> FnOnce<()> for Closure<'a> {
+    //     type Output = String;
+    //     fn call_once(self) -> String {
+    //         self.s += &*self.t;
+    //         self.s
+    //     }
+    // }
+    //
+    // so that the call to f works as if it were:
+    //
+    // f(Closure{s: s, t: &t});
+
+    // pub trait Fn<Args: Tuple>: FnMut<Args> {
+    //     /// Performs the call operation.
+    //     extern "rust-call" fn call(&self, args: Args) -> Self::Output;
+    // }
+    // pub trait FnMut<Args: Tuple>: FnOnce<Args> {
+    //     /// Performs the call operation.
+    //     extern "rust-call" fn call_mut(&mut self, args: Args) -> Self::Output;
+    // }
+    // pub trait FnOnce<Args: Tuple> {
+    //     /// The returned type after the call operator is used.
+    //     type Output;
+    //
+    //     /// Performs the call operation.
+    //     extern "rust-call" fn call_once(self, args: Args) -> Self::Output;
+    // }
+
+    fn test_1<F: Fn()>(f: F) {
+        f()
+    }
+    fn test_2<F: FnMut()>(mut f: F) {
+        f()
+    }
+    fn test_3<F: FnOnce()>(f: F) {
+        f()
+    }
+
+    fn test_4(f: impl Fn()) {
+        f()
+    }
+    fn test_5(mut f: impl FnMut()) {
+        f()
+    }
+    fn test_6(f: impl FnOnce()) {
+        f()
+    }
+
+    fn test_7(f: Box<dyn Fn()>) {
+        f()
+    }
+    fn test_8(mut f: Box<dyn FnMut()>) {
+        f()
+    }
+    fn test_9(f: Box<dyn FnOnce()>) {
+        f()
+    }
+
+    fn test_10(f: &dyn Fn()) {
+        f()
+    }
+    fn test_11(f: &mut dyn FnMut()) {
+        f()
+    }
+    fn test_12(f: &dyn FnOnce()) {
+        // // cannot move a value of type `dyn FnOnce()` [E0161]
+        // // the size of `dyn FnOnce()` cannot be statically determined
+        // //
+        // // cannot move out of `*f` which is behind a shared reference [E0507]
+        // // move occurs because `*f` has type `dyn FnOnce()`, which does not implement the `Copy` trait
+        // // Note: this value implements `FnOnce`, which causes it to be moved when called
+        // f()
+    }
+}
 fn main() {
     fn_vs_closure();
     test_closure();
     test_move();
     adaptors();
     three_iters();
+    test_trait_object();
 }
