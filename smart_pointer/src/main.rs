@@ -95,7 +95,66 @@ fn use_deref() {
     //     当 T: DerefMut<Target=U> 时从 &mut T 到 &mut U。
 }
 
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn use_drop_trait() {
+    //对于智能指针模式来说第二个重要的 trait 是 Drop，其允许我们在值要离开作用域时执行一些代码。
+    // 可以为任何类型提供 Drop trait 的实现，同时所指定的代码被用于释放类似于文件或网络连接的资源。
+    //
+    // 在 Rust 中，指定每当值离开作用域时被执行的代码，编译器会自动插入这些代码。
+    // 指定在值离开作用域时应该执行的代码的方式是实现 Drop trait。
+    // Drop trait 要求实现一个叫做 drop 的方法，它获取一个 self 的可变引用。
+
+    let c = CustomSmartPointer {
+        data: String::from("my stuff"),
+    };
+    let d = CustomSmartPointer {
+        data: String::from("other stuff"),
+    };
+    println!("Two CustomSmartPointers created.");
+
+    //栈顺序调用 Drop trait 的 drop 方法
+}
+
+fn use_drop_fn() {
+    //有时你可能需要提早清理某个值。
+    // 一个例子是当使用智能指针管理锁时；你可能希望强制运行 drop 方法来释放锁以便作用域中的其他代码可以获取锁。
+    // Rust 并不允许我们主动调用 Drop trait 的 drop 方法；
+    // 当我们希望在作用域结束之前就强制释放变量的话，我们应该使用的是由标准库提供的 std::mem::drop (core::mem::drop)。
+
+    let c = CustomSmartPointer {
+        data: String::from("my stuff"),
+    };
+
+    //Disposes of a value.
+    //
+    // This does so by calling the argument's implementation of Drop.
+    // This effectively does nothing for types which implement Copy, e.g. integers.
+    // Such values are copied and then moved into the function, so the value persists after this function call.
+    //
+    // This function is not magic; it is literally defined as
+    // pub fn drop<T>(_x: T) { }
+    //
+    // Because _x is moved into the function, it is automatically dropped before the function returns.
+    drop(c);
+
+    let d = CustomSmartPointer {
+        data: String::from("other stuff"),
+    };
+    println!("Two CustomSmartPointers created.");
+}
+
 fn main() {
-    use_box();
-    use_deref();
+    // use_box();
+    // use_deref();
+    use_drop_trait();
+    use_drop_fn();
 }
