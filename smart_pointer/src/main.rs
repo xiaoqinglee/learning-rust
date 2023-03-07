@@ -22,7 +22,7 @@
 
 use std::cell::{BorrowError, BorrowMutError, Ref, RefCell, RefMut};
 use std::ops::Deref;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
 enum List {
@@ -235,11 +235,156 @@ fn use_ref_cell() {
     println!("a_inner: {}", a_inner);
 }
 
+fn type_alias() {
+    //Type Alias
+    // 类型别名并不是一个独立的全新的类型，而是某一个类型的别名.
+
+    type Meters = u32;
+    let x: u32 = 5;
+    let y: Meters = 5;
+    println!("x + y = {}", x + y); //能够编译通过
+}
+
+fn ref_cycle() {
+    // // 使用常规引用 & 和 &mut 很难创造 reference cycle
+    // struct Node<'a> {
+    //     parent: Option<&'a Node<'a>>,
+    //     val: i32,
+    //     left: Option<&'a Node<'a>>,
+    //     right: Option<&'a Node<'a>>,
+    // }
+    // let mut a = Node {
+    //     parent: None,
+    //     val: 42,
+    //     left: None,
+    //     right: None,
+    // };
+    // let b = Node {
+    //     parent: Some(&a),
+    //     val: 43,
+    //     left: None,
+    //     right: None,
+    // };
+    // // a.left = Some(&b); //cannot assign to `a.left` because it is borrowed [E0506]
+
+    // // Rc 也不可以
+    // struct Node {
+    //     parent: Option<Rc<Node>>,
+    //     val: i32,
+    //     left: Option<Rc<Node>>,
+    //     right: Option<Rc<Node>>,
+    // }
+    // let a = Rc::new(Node {
+    //     parent: None,
+    //     val: 1,
+    //     left: None,
+    //     right: None,
+    // });
+    // let b = Rc::new(Node {
+    //     parent: Some(Rc::clone(&a)),
+    //     val: 2,
+    //     left: None,
+    //     right: None,
+    // });
+    // // a.left = Some(Rc::clone(&b)); //cannot assign to data in an `Rc` [E0594]
+
+    // 制造循环引用
+    #[derive(Debug)]
+    struct Node {
+        parent: Option<RefCell<Rc<Node>>>,
+        val: i32,
+        left: Option<RefCell<Rc<Node>>>,
+        right: Option<RefCell<Rc<Node>>>,
+    }
+    impl Node {
+        fn parent_inner_ref(&self) -> &RefCell<Rc<Node>> {
+            match self.parent {
+                Some(ref ref_of_ref_cell) => ref_of_ref_cell,
+                None => panic!(),
+            }
+        }
+    }
+    let 丁原 = Rc::new(Node {
+        parent: None,
+        val: 10,
+        left: None,
+        right: None,
+    });
+    let 吕布 = Rc::new(Node {
+        parent: Some(RefCell::new(Rc::clone(&丁原))),
+        val: 1,
+        left: None,
+        right: None,
+    });
+    let 董卓 = Rc::new(Node {
+        parent: None,
+        val: 100,
+        left: Some(RefCell::new(Rc::clone(&吕布))),
+        right: None,
+    });
+    // strong ref cycle 会造成 memory leak
+    *((*(吕布.parent_inner_ref())).borrow_mut()) = Rc::clone(&董卓);
+    // 验证存在 strong ref cycle
+    // println!("董卓: {:?}", 董卓) //thread 'main' has overflowed its stack fatal runtime error: stack overflow
+    assert_eq!(Rc::strong_count(&董卓), 2);
+    assert_eq!(Rc::weak_count(&董卓), 0);
+
+    // 避免循环引用
+    #[derive(Debug)]
+    struct NodeV2 {
+        parent: RefCell<Weak<NodeV2>>, //弱引用存在空实例(empty Weak<T> reference instance), 所以外层不再使用Option
+        val: i32,
+        left: Option<RefCell<Rc<NodeV2>>>,
+        right: Option<RefCell<Rc<NodeV2>>>,
+    }
+    let 丁原 = Rc::new(NodeV2 {
+        parent: RefCell::new(Weak::new()),
+        val: 10,
+        left: None,
+        right: None,
+    });
+    let 吕布 = Rc::new(NodeV2 {
+        parent: RefCell::new(Rc::downgrade(&丁原)), // Rc::downgrade() creates a new Weak pointer to this allocation.
+        val: 1,
+        left: None,
+        right: None,
+    });
+    let 董卓 = Rc::new(NodeV2 {
+        parent: RefCell::new(Weak::new()),
+        val: 100,
+        left: Some(RefCell::new(Rc::clone(&吕布))),
+        right: None,
+    });
+    *(吕布.parent.borrow_mut()) = Rc::downgrade(&董卓);
+    // 验证不存在 strong ref cycle
+    println!("董卓: {:?}", 董卓);
+    assert_eq!(Rc::strong_count(&董卓), 1);
+    assert_eq!(Rc::weak_count(&董卓), 1);
+
+    //强引用代表如何共享 Rc<T> 实例的所有权。
+    // 弱引用并不属于所有权关系，当 Rc<T> 实例被清理时其计数没有影响。
+    // 他们不会造成引用循环，因为任何弱引用的循环会在其相关的强引用计数为 0 时被打断。
+    //
+    // 调用 Rc::downgrade 时会得到 Weak<T> 类型的智能指针。
+    // 不同于将 Rc<T> 实例的 strong_count 加 1，调用 Rc::downgrade 会将 weak_count 加 1。
+    // Rc<T> 类型使用 weak_count 来记录其存在多少个 Weak<T> 引用，类似于 strong_count。
+    // 其区别在于 weak_count 无需计数为 0 就能使 Rc<T> 实例被清理。
+
+    //因为 Weak<T> 引用的值可能已经被丢弃了，为了使用 Weak<T> 所指向的值，我们必须确保其值仍然有效。
+    // 为此可以调用 Weak<T> 实例的 upgrade 方法，这会返回 Option<Rc<T>>。
+    // 如果 Rc<T> 值还未被丢弃，则结果是 Some；如果 Rc<T> 已被丢弃，则结果是 None。
+
+    println!("吕布义父: {:?}", 吕布.parent.borrow().upgrade()); //Some(...)
+    drop(董卓);
+    println!("吕布义父: {:?}", 吕布.parent.borrow().upgrade()); //None
+}
+
 fn main() {
     // use_box();
     // use_deref();
     // use_drop_trait();
     // use_drop_fn();
     // use_rc();
-    use_ref_cell();
+    // use_ref_cell();
+    ref_cycle();
 }
