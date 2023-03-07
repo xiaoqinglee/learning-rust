@@ -21,6 +21,7 @@
 // Ref<T> 和 RefMut<T>，通过 RefCell<T> 访问。（ RefCell<T> 是一个在运行时而不是在编译时执行借用规则的类型）。
 
 use std::ops::Deref;
+use std::rc::Rc;
 
 #[derive(Debug)]
 enum List {
@@ -152,9 +153,36 @@ fn use_drop_fn() {
     println!("Two CustomSmartPointers created.");
 }
 
+enum ListV2 {
+    Cons(i32, Rc<ListV2>),
+    Nil,
+}
+
+use crate::ListV2::{Cons, Nil};
+
+fn use_rc() {
+    let a = Rc::new(Cons(
+        4,
+        Rc::new(Cons(3, Rc::new(Cons(2, Rc::new(Cons(1, Rc::new(Nil))))))),
+    ));
+
+    // Rc<T> 允许通过 immutable ref 在程序的多个部分之间只读地共享数据。
+    //也可以调用 a.clone() 而不是 Rc::clone(&a)，不过在这里 Rust 的习惯是使用 Rc::clone。
+    //下面两种方式使用的都是 Rc<T> 实现的 Clone trait 的 fn clone(&self) -> Rc<T> 方法
+    let b = Rc::new(Cons(11, Rc::clone(&a)));
+    let c = Rc::new(Cons(12, a.clone()));
+
+    {
+        let d = Cons(13, Rc::clone(&a));
+        assert_eq!(Rc::strong_count(&a), 4);
+    }
+    assert_eq!(Rc::strong_count(&a), 3);
+}
+
 fn main() {
     // use_box();
     // use_deref();
-    use_drop_trait();
-    use_drop_fn();
+    // use_drop_trait();
+    // use_drop_fn();
+    use_rc();
 }
