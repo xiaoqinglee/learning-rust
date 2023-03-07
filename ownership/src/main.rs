@@ -16,7 +16,7 @@ fn shallow_transfer_vs_deep_clone() {
 
 fn shallow_copy_vs_shallow_transfer() {
     //如果一个类型实现了 Copy trait，那么一个旧的变量在将其赋值给其他变量后仍然可用。
-    // Rust 不允许自身或其任何部分实现了 Drop trait 的类型使用 Copy trait。
+    // Rust 不允许自身或其任何部分实现了 Drop trait 的类型实现 Copy trait。
 
     //任何一组简单标量值的组合都可以实现 Copy.
     //四种标量类型(integer, bool, float, char)和仅由四种标量类型作为元素的tuple和array实现了Copy trait
@@ -195,6 +195,35 @@ fn what_mutable_mean() {
     println!("a: {:?}", a); //[42, 22].
 }
 
+#[derive(Debug)]
+struct Droppable {
+    int_field: i32,
+    string_field1: String,
+    string_field2: String,
+}
+
+fn partial_move() {
+    let a = Droppable {
+        int_field: 0,
+        string_field1: "".to_string(),
+        string_field2: "".to_string(),
+    };
+
+    let i = a.int_field;
+    println!("{a:?}");
+
+    let s = a.string_field1;
+
+    // // borrow of partially moved value: `a` [E0382]
+    // // Note: partial move occurs because `a.string_field1` has type `String`, which does not implement the `Copy` trait
+    // println!("{a:?}");
+
+    println!("{:?}", a.int_field); //ok
+
+    println!("{:?}", a.string_field2); //ok
+}
+
 fn main() {
-    what_mutable_mean();
+    // what_mutable_mean();
+    partial_move();
 }
