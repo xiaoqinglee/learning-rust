@@ -20,6 +20,7 @@
 // Rc<T>，一个引用计数类型，其数据可以有多个所有者
 // Ref<T> 和 RefMut<T>，通过 RefCell<T> 访问。（ RefCell<T> 是一个在运行时而不是在编译时执行借用规则的类型）。
 
+use std::cell::{BorrowError, BorrowMutError, Ref, RefCell, RefMut};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -179,10 +180,66 @@ fn use_rc() {
     assert_eq!(Rc::strong_count(&a), 3);
 }
 
+fn use_ref_cell() {
+    //对于引用和 Box<T>，借用规则的不可变性作用于编译时。对于 RefCell<T>，这些不可变性作用于 运行时。
+    // 对于引用，如果违反这些规则，会得到一个编译错误。而对于 RefCell<T>，如果违反这些规则程序会 panic 并退出。
+    //
+    //因为 RefCell<T> 允许在运行时执行可变借用检查，所以我们可以在即便 RefCell<T> 自身是不可变的情况下修改其内部的值。
+    //
+    //当创建不可变和可变引用时，我们分别使用 & 和 &mut 语法。
+    // 对于 RefCell<T> 来说，则是 borrow 和 borrow_mut 方法，这属于 RefCell<T> 安全 API 的一部分。
+    // borrow 方法返回 Ref<T> 类型的智能指针，borrow_mut 方法返回 RefMut<T> 类型的智能指针。
+    // 这两个类型都实现了 Deref，所以可以当作常规引用对待。
+    //
+    // RefCell<T> 记录当前有多少个活动的 Ref<T> 和 RefMut<T> 智能指针。
+    // 每次调用 borrow，RefCell<T> 将活动的不可变借用计数加一。
+    // 当 Ref<T> 值离开作用域时，不可变借用计数减一。
+    // 就像编译时借用规则一样，RefCell<T> 在任何时候只允许有多个不可变借用或一个可变借用。
+    //
+    // 如果我们尝试违反这些规则，相比引用时的编译时错误，RefCell<T> 的实现会在运行时出现 panic。
+
+    // 下面三行能够编译通过, 因为尝试在 &mut a 时, b 永不再使用. 所以编译器允许 &mut a.
+    let mut a = String::from("42");
+    let b = &a;
+    let c = &mut a;
+
+    // // 下面三行运行时刻, 在尝试 a.borrow_mut() 时会panic, 即使 b 在之后不再使用.
+    // let a = RefCell::new(String::from("42"));
+    // let b = a.borrow();
+    // let c = a.borrow_mut();
+
+    // 下面的写法就没有问题了
+    let a = RefCell::new(String::from("42"));
+    let b = a.borrow();
+    drop(b);
+    {
+        let c = a.borrow();
+    }
+    let d = a.borrow_mut();
+
+    // non-panicking variants of borrow and borrow_mut
+    let a = RefCell::new(String::from("42"));
+    let d: Result<Ref<String>, BorrowError> = a.try_borrow();
+    let e: Result<RefMut<String>, BorrowMutError> = a.try_borrow_mut();
+
+    // *b: 42
+    // *b: 428341
+    // a_inner: 428341
+    let a = RefCell::new(String::from("42"));
+    let mut b = a.borrow_mut();
+    println!("*b: {}", *b);
+    b.push_str("8341");
+    println!("*b: {}", *b);
+    drop(b);
+    let a_inner = a.into_inner();
+    println!("a_inner: {}", a_inner);
+}
+
 fn main() {
     // use_box();
     // use_deref();
     // use_drop_trait();
     // use_drop_fn();
-    use_rc();
+    // use_rc();
+    use_ref_cell();
 }
