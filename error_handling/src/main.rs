@@ -158,3 +158,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("didn't return half way.");
     Ok(())
 }
+
+fn unwrap() {
+    // https://stackoverflow.com/questions/36362020/what-is-unwrap-in-rust-and-what-is-it-used-for
+
+    // In Rust, when you have an operation that may either return a T or fail,
+    // you will have a value of type Result<T,E> or Option<T>
+    // (E will be the error condition in case of an interesting error).
+    //
+    // The function unwrap(self) -> T will give you the embedded T if there is one.
+    // If instead there is not a T but an E or None then it will panic.
+    //
+    // It is best used when you are positively sure that you don't have an error.
+    // If that is not the case
+    // usually it is better either pattern-match the error or use the ? operator to forward the error.
+
+    Result::Ok::<_, String>(42).unwrap();
+    // Result::Err::<i32, _>(String::from("42")).unwrap(); //panic
+
+    Option::Some(42).unwrap();
+    // Option::None::<i32>.unwrap(); //panic
+}
