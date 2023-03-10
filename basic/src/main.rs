@@ -270,6 +270,42 @@ fn iterate_collection() {
     }
 }
 
+fn use_never() {
+    // Primitive Type never
+    // https://doc.rust-lang.org/std/primitive.never.html
+    //
+    // The ! type, also called “never”.
+    //
+    // ! represents the type of computations which never resolve to any value at all.
+    // For example, the exit function fn exit(code: i32) -> ! exits the process without ever returning, and so returns !.
+    //
+    // break, continue and return expressions also have type !.
+
+    // Diverging functions never return. They are marked using !, which is an empty type.
+    fn dead_end() -> ! {
+        panic!("你已经到了穷途末路，崩溃吧！");
+    }
+    fn forever() -> ! {
+        loop {
+            //do nothing
+        }
+    }
+
+    // // 无法编译
+    // let i = 2;
+    // let v = match i {
+    //     0..=3 => i,
+    //     _ => println!("不合规定的值:{}", i), //`match` arms have incompatible types [E0308]
+    // };
+
+    //可以编译
+    let i = 2;
+    let v = match i {
+        0..=3 => i,
+        _ => panic!("不合规定的值:{}", i),
+    };
+}
+
 fn main() {
-    iterate_collection()
+    use_never();
 }
