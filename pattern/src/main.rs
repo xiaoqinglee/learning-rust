@@ -308,6 +308,262 @@ fn where_pattern_matching_occurs() {
     }
 }
 
+fn named_variables() {
+    //Named variables are irrefutable patterns that match any value.
+
+    // Matched, y = 5
+    // at the end: x = Some(5), y = 10
+
+    let x = Some(5);
+    let y = 10;
+
+    match x {
+        // 这里创造了一个词法块, 块内的 y 屏蔽了块外的 y
+        Some(50) => println!("Got 50"),
+        Some(y) => println!("Matched, y = {y}"),
+        _ => println!("Default case, x = {:?}", x),
+    }
+
+    println!("at the end: x = {:?}, y = {y}", x);
+}
+
+fn or_pattern() {
+    let x = 1;
+    match x {
+        1 | 2 => println!("one or two"),
+        3 => println!("three"),
+        _ => println!("anything"),
+    }
+}
+
+fn range_pattern() {
+    // The compiler checks that the range isn’t empty at compile time,
+    // and because the only types for which Rust can tell if a range is empty or not are char and numeric values,
+    // ranges are only allowed with numeric or char values.
+
+    let x = 5;
+    match x {
+        1..=5 => println!("one through five"),
+        _ => println!("something else"),
+    }
+
+    let x = 'c';
+    match x {
+        'a'..='j' => println!("early ASCII letter"),
+        'k'..='z' => println!("late ASCII letter"),
+        _ => println!("something else"),
+    }
+}
+
+// We can also use patterns to destructure structs, enums, and tuples to use different parts of these values.
+
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn destructure_struct() {
+    let p = Point { x: 0, y: 7 };
+    let Point { x: a, y: b } = p;
+    assert_eq!(0, a);
+    assert_eq!(7, b);
+
+    let p = Point { x: 0, y: 7 };
+    let Point { x, y } = p;
+    assert_eq!(0, x);
+    assert_eq!(7, y);
+
+    let p = Point { x: 0, y: 7 };
+    match p {
+        Point { x, y: 0 } => println!("On the x axis at {x}"),
+        Point { x: 0, y } => println!("On the y axis at {y}"),
+        Point { x, y } => {
+            println!("On neither axis: ({x}, {y})");
+        }
+    }
+}
+
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+fn destructure_enum() {
+    let msg = Message::ChangeColor(0, 160, 255);
+    match msg {
+        Message::Quit => {
+            println!("The Quit variant has no data to destructure.");
+        }
+        Message::Move { x, y } => {
+            println!("Move in the x direction {x} and in the y direction {y}");
+        }
+        Message::Write(text) => {
+            println!("Text message: {text}");
+        }
+        Message::ChangeColor(r, g, b) => {
+            println!("Change the color to red {r}, green {g}, and blue {b}",)
+        }
+    }
+}
+
+enum Color {
+    Rgb(i32, i32, i32),
+    Hsv(i32, i32, i32),
+}
+
+enum Message2 {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(Color),
+}
+
+fn destructure_nested() {
+    let msg = Message2::ChangeColor(Color::Hsv(0, 160, 255));
+    match msg {
+        Message2::ChangeColor(Color::Rgb(r, g, b)) => {
+            println!("Change color to red {r}, green {g}, and blue {b}");
+        }
+        Message2::ChangeColor(Color::Hsv(h, s, v)) => {
+            println!("Change color to hue {h}, saturation {s}, value {v}")
+        }
+        _ => (),
+    }
+}
+
+fn destructure_nested2() {
+    let ((feet, inches), Point { x, y }) = ((3, 10), Point { x: 3, y: -10 });
+    assert_eq!(feet, 3);
+    assert_eq!(inches, 10);
+    assert_eq!(x, 3);
+    assert_eq!(y, -10);
+}
+
+fn ignore_entire_or_part_of_value_using_wildcard() {
+    //下划线可作为匹配但不绑定任何值的通配符模式。虽然这作为 match 表达式最后的分支特别有用，也可以将其用于任意模式，包括函数参数中。
+    fn foo(_: i32, y: i32) {
+        println!("This code only uses the y parameter: {}", y);
+    }
+
+    //单独使用下划线不会绑定值, 所以没有实现 Copy trait 的 String 变量不会 move 进去.
+    let s = Some(String::from("Hello!"));
+    if let Some(_) = s {
+        println!("found a string");
+    }
+    println!("{:?}", s); // 可以编译
+
+    // 可以在一个模式内部使用 _ 忽略部分值. 例如, 当只需要测试部分值, 在运行的代码中没有用到其他被忽略部分的值时。
+    // 当不需要 Some 中的值时在模式内使用下划线来匹配 Some 成员
+    let mut setting_value = Some(5);
+    let new_setting_value = Some(10);
+    match (setting_value, new_setting_value) {
+        (Some(_), Some(_)) => {
+            println!("Can't overwrite an existing customized value");
+        }
+        _ => {
+            setting_value = new_setting_value;
+        }
+    }
+    println!("setting is {:?}", setting_value);
+
+    let numbers = (2, 4, 8, 16, 32);
+    match numbers {
+        (first, _, third, _, fifth) => {
+            println!("Some numbers: {first}, {third}, {fifth}")
+        }
+    }
+}
+
+fn ignore_part_of_value_using_two_dots() {
+    // Ignoring Remaining Parts of a Value with ..
+
+    struct Point {
+        x: i32,
+        y: i32,
+        z: i32,
+    }
+    let origin = Point { x: 0, y: 0, z: 0 };
+    match origin {
+        Point { x, .. } => println!("x is {}", x),
+    }
+
+    let numbers = (2, 4, 8, 16, 32);
+    match numbers {
+        (first, .., last) => {
+            println!("Some numbers: {first}, {last}");
+        }
+    }
+
+    // // 一个带有歧义的 .. 例子, 不能编译
+    // let numbers = (2, 4, 8, 16, 32);
+    // match numbers {
+    //     (.., second, ..) => {
+    //         println!("Some numbers: {}", second)
+    //     }
+    // }
+}
+
+fn match_guard() {
+    // 匹配守卫（match guard）是一个指定于 match 分支模式之后的额外 if 条件，它也必须同时被满足才能选择此分支。
+    // 缺点: 编译器不会尝试为包含匹配守卫的模式检查穷尽性
+
+    let num = Some(4);
+    match num {
+        Some(x) if x % 2 == 0 => println!("The number {} is even", x),
+        Some(x) => println!("The number {} is odd", x),
+        None => (),
+    }
+
+    // match guard 提供了这样一个能力: 在测试的时候使用 match 词法块外部的某个变量的值作为 input.
+    let x = Some(5);
+    let y = 10;
+    match x {
+        Some(50) => println!("Got 50"),
+        Some(n) if n == y => println!("Matched, n = {n}"),
+        _ => println!("Default case, x = {:?}", x),
+    }
+    println!("at the end: x = {:?}, y = {y}", x);
+
+    // match guard 作用于整个 match arm
+    let x = 4;
+    let y = false;
+    match x {
+        4 | 5 | 6 if y => println!("yes"), // 等价于 (4 | 5 | 6) if y => ...
+        _ => println!("no"),
+    }
+}
+
+fn at_binding() {
+    // The at operator @ lets us create a variable that holds a value
+    // at the same time as we’re testing that value for a pattern match.
+    // 使用 @ 可以在一个模式中同时测试和保存变量值。
+
+    enum Message {
+        Hello { id: i32 },
+    }
+    let msg = Message::Hello { id: 5 };
+
+    match msg {
+        Message::Hello {
+            id: id_variable @ 3..=7,
+        } => println!("Found an id in range: {}", id_variable),
+        Message::Hello { id: 10..=12 } => {
+            println!("Found an id in another range")
+        }
+        Message::Hello { id } => println!("Found some other id: {}", id),
+    }
+
+    // 上例会打印出 Found an id in range: 5。通过在 3..=7 之前指定 id_variable @，我们捕获了任何匹配此范围的值并同时测试其值匹配这个范围模式。
+    //
+    // 第二个分支只在模式中指定了一个范围，分支相关代码没有一个包含 id 字段实际值的变量。
+    // id 字段的值可以是 10、11 或 12，不过这个模式的代码并不知情也不能使用 id 字段中的值，因为没有将 id 值保存进一个变量。
+    //
+    // 最后一个分支指定了一个没有范围的变量，此时确实拥有可以用于分支代码的变量 id，因为这里使用了结构体字段简写语法。
+    // 不过此分支中没有像前两个分支那样对 id 字段的值进行测试：任何值都会匹配此分支。
+}
+
 fn main() {
     // arms_order_matters(RoughTime::InThePast(TimeUnit::Hours, 1));
     // arms_order_matters(RoughTime::InThePast(TimeUnit::Days, 1));
@@ -316,5 +572,16 @@ fn main() {
     // ref_and_deref();
     // default_binding_modes();
     // wildcard_pattern();
-    where_pattern_matching_occurs();
+    // where_pattern_matching_occurs();
+    named_variables();
+    or_pattern();
+    range_pattern();
+    destructure_struct();
+    destructure_enum();
+    destructure_nested();
+    destructure_nested2();
+    ignore_entire_or_part_of_value_using_wildcard();
+    ignore_part_of_value_using_two_dots();
+    match_guard();
+    at_binding();
 }
