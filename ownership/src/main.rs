@@ -223,6 +223,34 @@ fn partial_move() {
     println!("{:?}", a.string_field2); //ok
 }
 
+// &'static and T: 'static
+// https://practice.rs/lifetime/static.html
+//
+//
+// 1. &'static
+//
+// As a reference lifetime, &'static indicates the data pointed to by the reference lives as long as the running program.
+//
+// 2. T: 'static
+//
+// As a trait bound, it means the type does not contain any non-static references.
+
+// &'static only indicates that the data can live forever, not the reference.
+// The latter one will be constrained by its scope.
+fn static_in_ref() {
+    {
+        // Make a `string` literal and print it:
+        let static_string = "I'm in read-only memory";
+        println!("static_string: {}", static_string);
+
+        // When `static_string` goes out of scope, the reference
+        // can no longer be used, but the data remains in the binary.
+    }
+
+    // //cannot find value `static_string` in this scope [E0425]
+    // println!("static_string reference remains alive: {}", static_string);
+}
+
 fn main() {
     // what_mutable_mean();
     partial_move();
