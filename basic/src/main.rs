@@ -43,12 +43,42 @@ fn scalar() {
     println!("d: {}", d);
 
     //Rust 的字符类型大小为 4 个字节，表示的是一个 Unicode 标量值，这意味着它可以表示的远远不止是 ASCII。
+    // e: A
+    // e: 中
+    // e: 😻
+    // s.len(): 12
+    // std::mem::size_of::<u8>(): 1
+    // std::mem::size_of_val(&s[..]): 12
+    // v.len(): 8
+    // std::mem::size_of::<char>(): 4
+    // std::mem::size_of_val(&v[..]): 32
+    // v: ['l', 'o', 'v', 'e', ':', ' ', '❤', '\u{fe0f}']
     let e = 'A'; //char
     println!("e: {}", e);
     let e = '中';
     println!("e: {}", e);
     let e = '😻';
     println!("e: {}", e);
+
+    let s = String::from("love: ❤️");
+    println!("s.len(): {}", s.len());
+    println!("std::mem::size_of::<u8>(): {}", std::mem::size_of::<u8>());
+    println!(
+        "std::mem::size_of_val(&s[..]): {}",
+        std::mem::size_of_val(&s[..])
+    );
+
+    let v: Vec<char> = s.chars().collect();
+    println!("v.len(): {}", v.len());
+    println!(
+        "std::mem::size_of::<char>(): {}",
+        std::mem::size_of::<char>()
+    );
+    println!(
+        "std::mem::size_of_val(&v[..]): {}",
+        std::mem::size_of_val(&v[..])
+    );
+    println!("v: {:?}", v);
 }
 
 fn tuple() {
@@ -307,5 +337,5 @@ fn use_never() {
 }
 
 fn main() {
-    use_never();
+    scalar();
 }
