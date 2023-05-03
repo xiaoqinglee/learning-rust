@@ -67,6 +67,14 @@ fn fn_vs_closure() {
 // and if all values it captures by copy or move are Clone or Copy, respectively.
 
 fn test_closure() {
+    fn add_one(x: usize) -> usize {
+        x + 1
+    }
+    let ptr: fn(usize) -> usize = add_one;
+    assert_eq!(ptr(5), 6);
+    let clos: fn(usize) -> usize = |x| x + 5;
+    assert_eq!(clos(5), 10);
+
     fn fn_instance(i: i64) -> i64 {
         i + 1
     }
