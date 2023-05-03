@@ -23,12 +23,50 @@ fn scalar() {
     let a = 0b1111_0000;
     let a = b'A'; //u8
 
-    //认浮点类型是 f64，因为在现代的 CPU 中它的速度与 f32 的几乎相同，但精度更高。
+    //默认浮点类型是 f64，因为在现代的 CPU 中它的速度与 f32 的几乎相同，但精度更高。
     let b = 2.0; //f64
     let b: f32 = 2.0;
 
     // //cannot add a float to an integer [E0277] no implementation for `{integer} + {float}`
     // let c = 5 + 1.0;
+
+    // [src/main.rs:33] -0.0 = -0.0
+    // [src/main.rs:34] 0.0 = 0.0
+    // [src/main.rs:35] -0.0 + 0.0 = 0.0
+    // [src/main.rs:36] -0.0 == 0.0 = true
+    // [src/main.rs:37] (0.0 as f32).is_sign_positive() = true
+    // [src/main.rs:38] (-0.0 as f32).is_sign_positive() = false
+    dbg!(-0.0);
+    dbg!(0.0);
+    dbg!(-0.0 + 0.0);
+    dbg!(-0.0 == 0.0);
+    dbg!((0.0 as f32).is_sign_positive());
+    dbg!((-0.0 as f32).is_sign_positive());
+
+    // [src/main.rs:39] 1.0 / 0.0 = inf
+    dbg!(1.0 / 0.0);
+
+    // 3.0000000000000004
+    // 4.0
+    // 3.0
+    // 3.0
+    // 3.0
+    // 3.0
+    let a: f64 = 0.1 * 3.0 * 10.0;
+    println!("{:?}", a);
+    println!("{:?}", a.ceil());
+    println!("{:?}", a.floor());
+    let a: f64 = 3.0;
+    println!("{:?}", a);
+    println!("{:?}", a.ceil());
+    println!("{:?}", a.floor());
+
+    let x = 3.6_f32;
+    let y = -3.6_f32;
+    let abs_difference_x = (x.fract() - 0.6).abs();
+    let abs_difference_y = (y.fract() - (-0.6)).abs();
+    assert!(abs_difference_x <= f32::EPSILON);
+    assert!(abs_difference_y <= f32::EPSILON);
 
     let c = 10.0 / 3.0; //f64
     println!("c: {}", c);
@@ -38,6 +76,7 @@ fn scalar() {
     let c = 5 % 2; //i32
     println!("c: {}", c);
 
+    // bool值运算时使用位运算符 & | !
     let d = true;
     let d: bool = false;
     println!("d: {}", d);
