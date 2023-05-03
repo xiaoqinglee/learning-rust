@@ -45,6 +45,8 @@ fn scalar() {
 
     // [src/main.rs:39] 1.0 / 0.0 = inf
     dbg!(1.0 / 0.0);
+    // // error: this operation will panic at runtime
+    // dbg!(1 / 0);
 
     // 3.0000000000000004
     // 4.0
