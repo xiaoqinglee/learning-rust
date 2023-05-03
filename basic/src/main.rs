@@ -377,6 +377,26 @@ fn use_never() {
     };
 }
 
+fn reference() {
+    // Reference equality by address,
+    // instead of comparing the values pointed to,
+    // is accomplished via implicit reference-pointer coercion and raw pointer equality via ptr::eq,
+    // while PartialEq compares values.
+
+    use std::ptr;
+
+    let five = 5;
+    let other_five = 5;
+    let five_ref = &five;
+    let same_five_ref = &five;
+    let other_five_ref = &other_five;
+
+    assert!(five_ref == same_five_ref);
+    assert!(five_ref == other_five_ref);
+
+    assert!(ptr::eq(five_ref, same_five_ref));
+    assert!(!ptr::eq(five_ref, other_five_ref));
+}
 fn main() {
-    scalar();
+    reference();
 }
