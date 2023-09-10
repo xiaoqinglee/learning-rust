@@ -78,10 +78,23 @@ fn scalar() {
     let c = 5 % 2; //i32
     println!("c: {}", c);
 
-    // bool值运算时使用位运算符 & | !
+    // https://doc.rust-lang.org/reference/types/boolean.html
+    // https://doc.rust-lang.org/reference/expressions/operator-expr.html#lazy-boolean-operators
+    // bool值运算时使用位运算符 &, |, !, &&, ||
     let d = true;
     let d: bool = false;
     println!("d: {}", d);
+
+    fn do_compute() -> bool {
+        println!("in do_compute");
+        return false;
+    }
+
+    let x = false && do_compute(); // 不执行 do_compute
+    let x = true || do_compute(); // 不执行 do_compute
+
+    let x = false & do_compute(); // 执行 do_compute
+    let x = true | do_compute(); //  执行 do_compute
 
     //Rust 的字符类型大小为 4 个字节，表示的是一个 Unicode 标量值，这意味着它可以表示的远远不止是 ASCII。
     // e: A
