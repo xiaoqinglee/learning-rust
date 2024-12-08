@@ -147,11 +147,11 @@ impl Rectangle {
     //
     // 关联函数经常被用作返回一个结构体新实例的构造函数。
 
-    fn new(width: u32, height: u32) -> Rectangle {
-        Rectangle { width, height }
+    fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
     }
 
-    fn new_square(side: u32) -> Rectangle {
+    fn new_square(side: u32) -> Self {
         Rectangle {
             width: side,
             height: side,

@@ -64,7 +64,7 @@ struct Review {
 
 impl Summary_V2 for Review {
     //实现所有没有默认实现的方法和想要覆盖的有默认实现的方法
-    //这个集合可以使空集
+    //这个集合可以是空集
     fn summarize_author(&self) -> String {
         self.author.clone()
     }
