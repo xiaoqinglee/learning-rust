@@ -395,6 +395,15 @@ fn reference() {
     // instead of comparing the values pointed to,
     // is accomplished via implicit reference-pointer coercion and raw pointer equality via ptr::eq,
     // while PartialEq compares values.
+    
+    // https://users.rust-lang.org/t/using-reference-to-do-comparison-instead-of-value/43074
+    
+    // References don't behave like pointers in other languages, and comparison of references will never compare addresses.
+    // == acts as if it's calling .partial_eq method, and will compare things semantically as implemented for each type.
+    
+    // In Rust, comparing references always means dereferencing and comparing the underlying values. 
+    // reference == &needle has the same behavior as *reference == *&needle. 
+    
 
     use std::ptr;
 
