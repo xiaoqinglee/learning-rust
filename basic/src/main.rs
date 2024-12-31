@@ -323,6 +323,7 @@ fn iterate_collection() {
         String::from("hi"),
         String::from("halo"),
     ];
+    // call strings.into_iter()
     for s in strings {
         //每一个 String被移动进 s
         println!("{}", s);
@@ -336,6 +337,7 @@ fn iterate_collection() {
         String::from("hi"),
         String::from("halo"),
     ];
+    // call (&strings).into_iter()
     for rs in &strings {
         //这里 &strings 的类型是 &Vec<String>，rs 的类型是 &String。
         println!("String {:?} is at address {:p}.", *rs, rs);
@@ -347,6 +349,7 @@ fn iterate_collection() {
         String::from("hi"),
         String::from("halo"),
     ];
+    // call (&mut strings).into_iter()
     for rs in &mut strings {
         // rs 的类型是 &mut String
         rs.push('\n'); //每个字符串添加一个换行符

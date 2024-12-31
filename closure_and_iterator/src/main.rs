@@ -250,6 +250,11 @@ fn adaptors() {
 }
 
 fn three_iters() {
+    //https://stackoverflow.com/questions/34733811/what-is-the-difference-between-iter-and-into-iter
+    //The iterator returned by into_iter may yield any of T, &T or &mut T, depending on the context.
+    //The iterator returned by iter will yield &T, by convention.
+    //The iterator returned by iter_mut will yield &mut T, by convention.
+
     //impl<T> [T]
     // pub fn iter(&self) -> Iter<'_, T>
     // Returns an iterator of slices.
@@ -283,6 +288,20 @@ fn three_iters() {
     assert_eq!(v1_into_iter.next(), Some(1));
     assert_eq!(v1_into_iter.next(), Some(2));
     assert_eq!(v1_into_iter.next(), Some(3));
+    assert_eq!(v1_into_iter.next(), None);
+
+    let v1 = vec![1, 2, 3];
+    let mut v1_into_iter = (&v1).into_iter();
+    assert_eq!(v1_into_iter.next(), Some(&1));
+    assert_eq!(v1_into_iter.next(), Some(&2));
+    assert_eq!(v1_into_iter.next(), Some(&3));
+    assert_eq!(v1_into_iter.next(), None);
+
+    let mut v1 = vec![1, 2, 3];
+    let mut v1_into_iter = (&mut v1).into_iter();
+    assert_eq!(v1_into_iter.next(), Some(&mut 1));
+    assert_eq!(v1_into_iter.next(), Some(&mut 2));
+    assert_eq!(v1_into_iter.next(), Some(&mut 3));
     assert_eq!(v1_into_iter.next(), None);
 }
 
