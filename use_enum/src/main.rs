@@ -156,7 +156,7 @@ fn use_pattern_matching() {
     let c: Option<i32> = Option::None;
     // //mismatched types [E0308] expected `i32`, found `u8` Note: expected enum `Option<i32>` found enum `Option<u8>`
     // println!("a == b: {}", a == b)
-    println!("a == b: {}", a == c); //a == b: true
+    println!("a == c: {}", a == c); //a == c: true
 
     dbg!(match_language_v1(Language::C));
     dbg!(match_language_v1(Language::Rust));

@@ -130,6 +130,10 @@ fn use_From_trait() -> Result<String, MyErrorFoo> {
     }
 }
 
+// ? is used at the end of an expression returning a Result, 
+// and is equivalent to a match expression, where 
+// the Err(err) branch expands to an early return Err(From::from(err)), 
+// and the Ok(ok) branch expands to an ok expression.
 fn use_unwrapped_ok_value() -> Result<String, MyErrorFoo> {
     let secret_number = rand::thread_rng().gen_range(1..=2);
 
