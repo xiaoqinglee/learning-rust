@@ -172,11 +172,36 @@ fn cast() {
     println!("255 as u8: {}", big_int as u8); // 255
     println!("256 as u8: {}", (big_int + 1) as u8); //0
 
-    let big_int: i32 = i32::MAX;
-    assert_eq!(big_int, (big_int as f32) as i32);
 
-    let big_int = i64::MAX - 1;
-    assert_ne!(big_int, (big_int as f32) as i64);
+    // [src/main.rs:175:5] i64::MAX = 9223372036854775807
+    // [src/main.rs:176:5] (i64::MAX as f64) as i64 = 9223372036854775807
+    // [src/main.rs:177:5] ((i64::MAX - 1) as f64) as i64 = 9223372036854775807
+    // [src/main.rs:179:5] i32::MAX = 2147483647
+    // [src/main.rs:180:5] (i32::MAX as f64) as i32 = 2147483647
+    // [src/main.rs:181:5] ((i32::MAX - 1) as f64) as i32 = 2147483646
+    // [src/main.rs:183:5] i64::MAX = 9223372036854775807
+    // [src/main.rs:184:5] (i64::MAX as f32) as i64 = 9223372036854775807
+    // [src/main.rs:185:5] ((i64::MAX - 1) as f32) as i64 = 9223372036854775807
+    // [src/main.rs:187:5] i32::MAX = 2147483647
+    // [src/main.rs:188:5] (i32::MAX as f32) as i32 = 2147483647
+    // [src/main.rs:189:5] ((i32::MAX - 1) as f32) as i32 = 2147483647
+
+
+    dbg!(i64::MAX);
+    dbg!((i64::MAX as f64) as i64);
+    dbg!(((i64::MAX - 1) as f64) as i64);
+
+    dbg!(i32::MAX);
+    dbg!((i32::MAX as f64) as i32);
+    dbg!(((i32::MAX - 1) as f64) as i32);
+
+    dbg!(i64::MAX);
+    dbg!((i64::MAX as f32) as i64);
+    dbg!(((i64::MAX - 1) as f32) as i64);
+
+    dbg!(i32::MAX);
+    dbg!((i32::MAX as f32) as i32);
+    dbg!(((i32::MAX - 1) as f32) as i32);
 }
 
 // 函数的参数必须标明类型, 编译器不提供参数类型的推断, 这是rust语言的策略.
@@ -398,15 +423,14 @@ fn reference() {
     // instead of comparing the values pointed to,
     // is accomplished via implicit reference-pointer coercion and raw pointer equality via ptr::eq,
     // while PartialEq compares values.
-    
+
     // https://users.rust-lang.org/t/using-reference-to-do-comparison-instead-of-value/43074
-    
+
     // References don't behave like pointers in other languages, and comparison of references will never compare addresses.
     // == acts as if it's calling .partial_eq method, and will compare things semantically as implemented for each type.
-    
-    // In Rust, comparing references always means dereferencing and comparing the underlying values. 
-    // reference == &needle has the same behavior as *reference == *&needle. 
-    
+
+    // In Rust, comparing references always means dereferencing and comparing the underlying values.
+    // reference == &needle has the same behavior as *reference == *&needle.
 
     use std::ptr;
 
@@ -423,5 +447,5 @@ fn reference() {
     assert!(!ptr::eq(five_ref, other_five_ref));
 }
 fn main() {
-    reference();
+    cast();
 }
