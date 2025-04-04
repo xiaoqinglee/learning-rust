@@ -21,7 +21,7 @@ fn fn_vs_closure() {
     let add_one2 = |i: i64| -> i64 { return i + 1 };
     let add_one3 = |i: i64| -> i64 { i + 1 };
     let add_one4 = |i: i64| i + 1;
-    // In Rust, the type of closure is inferred based on the types of its arguments and the return value. 
+    // In Rust, the type of closure is inferred based on the types of its arguments and the return value.
     // 闭包的类型可以被 inferred，所以闭包的参数可以被 inferred。这一点和函数 fn 不同，fn 参数的类型必须被显式声明。
     let add_one5 = |i| i + 1;
     dbg!(add_one5(42 as i64));

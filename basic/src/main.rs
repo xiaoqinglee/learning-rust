@@ -172,7 +172,6 @@ fn cast() {
     println!("255 as u8: {}", big_int as u8); // 255
     println!("256 as u8: {}", (big_int + 1) as u8); //0
 
-
     // [src/main.rs:175:5] i64::MAX = 9223372036854775807
     // [src/main.rs:176:5] (i64::MAX as f64) as i64 = 9223372036854775807
     // [src/main.rs:177:5] ((i64::MAX - 1) as f64) as i64 = 9223372036854775807
@@ -185,7 +184,6 @@ fn cast() {
     // [src/main.rs:187:5] i32::MAX = 2147483647
     // [src/main.rs:188:5] (i32::MAX as f32) as i32 = 2147483647
     // [src/main.rs:189:5] ((i32::MAX - 1) as f32) as i32 = 2147483647
-
 
     dbg!(i64::MAX);
     dbg!((i64::MAX as f64) as i64);
@@ -418,6 +416,25 @@ fn use_never() {
     };
 }
 
+fn optional_semicolon() {
+    //https://stackoverflow.com/questions/62637801/why-is-the-semicolon-after-the-return-statement-optional
+    fn add_one1(i: i64) -> i64 {
+        i + 1
+    }
+    fn add_one2(i: i64) -> i64 {
+        return i + 1
+    }
+    fn add_one3(i: i64) -> i64 {
+        return i + 1;
+    }
+    // [src/main.rs:430:5] add_one1(7) = 8
+    // [src/main.rs:431:5] add_one2(7) = 8
+    // [src/main.rs:432:5] add_one3(7) = 8
+    dbg!(add_one1(7));
+    dbg!(add_one2(7));
+    dbg!(add_one3(7));
+}
+
 fn reference() {
     // Reference equality by address,
     // instead of comparing the values pointed to,
@@ -447,5 +464,5 @@ fn reference() {
     assert!(!ptr::eq(five_ref, other_five_ref));
 }
 fn main() {
-    cast();
+    optional_semicolon();
 }
