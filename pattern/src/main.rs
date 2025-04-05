@@ -1,23 +1,23 @@
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum TimeUnit {
-    Seconds,
-    Minutes,
-    Hours,
-    Days,
-    Months,
-    Years,
+    Second,
+    Minute,
+    Hour,
+    Day,
+    Month,
+    Year,
 }
 
 impl TimeUnit {
     /// 返回该时间单位的复数名词。
     fn plural(self) -> &'static str {
         match self {
-            TimeUnit::Seconds => "seconds",
-            TimeUnit::Minutes => "minutes",
-            TimeUnit::Hours => "hours",
-            TimeUnit::Days => "days",
-            TimeUnit::Months => "months",
-            TimeUnit::Years => "years",
+            TimeUnit::Second => "seconds",
+            TimeUnit::Minute => "minutes",
+            TimeUnit::Hour => "hours",
+            TimeUnit::Day => "days",
+            TimeUnit::Month => "months",
+            TimeUnit::Year => "years",
         }
     }
     /// 返回该时间单位的单数名词。
@@ -35,14 +35,14 @@ enum RoughTime {
 
 fn arms_order_matters(rt: RoughTime) -> String {
     match rt {
-        RoughTime::InThePast(TimeUnit::Hours, 1) => format!("an hour ago"),
+        RoughTime::InThePast(TimeUnit::Hour, 1) => format!("an hour ago"),
         RoughTime::InThePast(unit, 1) => format!("a {} ago", unit.singular()),
-        RoughTime::InThePast(units, count) => format!("{} {} ago", count, units.plural()),
+        RoughTime::InThePast(unit, count) => format!("{} {} ago", count, unit.plural()),
         RoughTime::JustNow => format!("just now"),
-        RoughTime::InTheFuture(TimeUnit::Hours, 1) => format!("an hour from now"),
+        RoughTime::InTheFuture(TimeUnit::Hour, 1) => format!("an hour from now"),
         RoughTime::InTheFuture(unit, 1) => format!("a {} from now", unit.singular()),
-        RoughTime::InTheFuture(units, count) => {
-            format!("{} {} from now", count, units.plural())
+        RoughTime::InTheFuture(unit, count) => {
+            format!("{} {} from now", count, unit.plural())
         }
     }
 }
@@ -573,15 +573,15 @@ fn main() {
     // default_binding_modes();
     // wildcard_pattern();
     // where_pattern_matching_occurs();
-    named_variables();
-    or_pattern();
-    range_pattern();
-    destructure_struct();
-    destructure_enum();
-    destructure_nested();
-    destructure_nested2();
+    // named_variables();
+    // or_pattern();
+    // range_pattern();
+    // destructure_struct();
+    // destructure_enum();
+    // destructure_nested();
+    // destructure_nested2();
     ignore_entire_or_part_of_value_using_wildcard();
     ignore_part_of_value_using_two_dots();
-    match_guard();
-    at_binding();
+    // match_guard();
+    // at_binding();
 }
