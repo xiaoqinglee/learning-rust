@@ -116,40 +116,40 @@ fn test_closure() {
 
     //fn_instance 实现了 Copy trait
     //
-    test_fn(fn_instance);
-    test_Fn(fn_instance);
-    test_FnMut(fn_instance);
     test_FnOnce(fn_instance);
+    test_FnMut(fn_instance);
+    test_Fn(fn_instance);
+    test_fn(fn_instance);
 
     //Fn_instance1 实现了 Copy trait
     //
-    test_fn(Fn_instance1); // 没有捕获任何上下文变量的闭包实例可以传递给 function pointer 变量.
-    test_Fn(Fn_instance1);
-    test_FnMut(Fn_instance1);
     test_FnOnce(Fn_instance1);
+    test_FnMut(Fn_instance1);
+    test_Fn(Fn_instance1);
+    test_fn(Fn_instance1); // 没有捕获任何上下文变量的闭包实例可以传递给 function pointer 变量.
 
     //Fn_instance2 实现了 Copy trait
     //
-    // test_fn(Fn_instance2); //mismatched types [E0308] expected fn pointer, found closure
-    test_Fn(Fn_instance2);
-    test_FnMut(Fn_instance2);
     test_FnOnce(Fn_instance2);
+    test_FnMut(Fn_instance2);
+    test_Fn(Fn_instance2);
+    // test_fn(Fn_instance2); //mismatched types [E0308] expected fn pointer, found closure
 
-    //FnMut_instance 没有实现 Copy trait
-    //
-    // test_fn(FnMut_instance); //mismatched types [E0308] expected fn pointer, found closure
-    // test_Fn(FnMut_instance); //expected a closure that implements the `Fn` trait, but this closure only implements `FnMut` [E0525]
+    // test_FnOnce(FnMut_instance); //ok
     test_FnMut(FnMut_instance);
-    // test_FnMut(FnMut_instance); //use of moved value: `FnMut_instance` [E0382] value used here after move Note: closure cannot be moved more than once as it is not `Copy` due to moving the variable `vec` out of its environment Help: consider mutably borrowing `FnMut_instance
-    // test_FnOnce(FnMut_instance); //use of moved value: `FnMut_instance` [E0382] value used here after move Note: closure cannot be moved more than once as it is not `Copy` due to moving the variable `vec` out of its environment Help: consider mutably borrowing `FnMut_instance
-
-    //FnOnce_instance 没有实现 Copy trait
+    // test_Fn(FnMut_instance); //expected a closure that implements the `Fn` trait, but this closure only implements `FnMut` [E0525]
+    // test_fn(FnMut_instance); //mismatched types [E0308] expected fn pointer, found closure
     //
-    // test_fn(FnOnce_instance); //mismatched types [E0308] expected fn pointer, found closure
-    // test_Fn(FnOnce_instance); //expected a closure that implements the `Fn` trait, but this closure only implements `FnOnce` [E0525]
-    // test_FnMut(FnOnce_instance); //expected a closure that implements the `FnMut` trait, but this closure only implements `FnOnce` [E0525]
+    // FnMut_instance 没有实现 Copy trait
+    // test_FnMut(FnMut_instance); //use of moved value: `FnMut_instance` [E0382] value used here after move
+
     test_FnOnce(FnOnce_instance);
-    // test_FnOnce(FnOnce_instance); //use of moved value: `FnOnce_instance` [E0382] value used here after move Note: closure cannot be moved more than once as it is not `Copy` due to moving the variable `vec` out of its environment
+    // test_FnMut(FnOnce_instance); //expected a closure that implements the `FnMut` trait, but this closure only implements `FnOnce` [E0525]
+    // test_Fn(FnOnce_instance); //expected a closure that implements the `Fn` trait, but this closure only implements `FnOnce` [E0525]
+    // test_fn(FnOnce_instance); //mismatched types [E0308] expected fn pointer, found closure
+    //
+    // FnOnce_instance 没有实现 Copy trait
+    // test_FnOnce(FnOnce_instance); //use of moved value: `FnOnce_instance` [E0382] value used here after move
 }
 
 //https://doc.rust-lang.org/reference/types/closure.html
